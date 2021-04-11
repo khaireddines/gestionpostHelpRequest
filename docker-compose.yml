@@ -1,0 +1,49 @@
+version: "3.1"
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql-db-service-gestionpost
+    working_dir: /application
+    restart: always
+    volumes:
+      - .:/application
+      - ./Database:/var/lib/mysql
+    # here where you put your database Credentials
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=gestionpost
+      - MYSQL_USER=gestionpost
+      - MYSQL_PASSWORD=gestionpost
+    ports:
+      - 3307:3306
+
+  webserver:
+    image: nginx:alpine
+    container_name: webserver-gestionpost
+    working_dir: /application
+    restart: always
+    volumes:
+      - .:/application
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    # change the 88 to whatever port you want
+    ports:
+      - 88:80
+
+  php-fpm:
+    build: docker/php-fpm
+    container_name: php-fpm-gestionpost
+    working_dir: /application/gestionpost
+    restart: always
+    volumes:
+      - .:/application
+      - ./docker/php-fpm/php-ini-overrides.ini:/etc/php/7.2/fpm/conf.d/99-overrides.ini
+
+
+  adminer:
+    image: adminer
+    depends_on:
+      - mysql
+    container_name: adminer-service-gestionpost
+    restart: always
+    ports:
+      - 8083:8080
